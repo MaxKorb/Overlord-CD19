@@ -627,6 +627,7 @@ file.exists(
   )
 )
 
+
 # ============================================================
 # 9. FIGURE 2. CD19+ B-CELL COUNTS OVER TIME
 # ============================================================
@@ -648,16 +649,51 @@ figure2_data <- ny_tabell %>%
       `Måling nr.` == 7 ~ 30,
       `Måling nr.` == 8 ~ 36,
       TRUE ~ NA_real_
+    ),
+    Visit_position = case_when(
+      `Måling nr.` == 1 ~ 1,
+      `Måling nr.` == 2 ~ 2,
+      `Måling nr.` == 3 ~ 3,
+      `Måling nr.` == 4 ~ 4,
+      `Måling nr.` == 5 ~ 5,
+      `Måling nr.` == 6 ~ 6,
+      `Måling nr.` == 7 ~ 7,
+      `Måling nr.` == 8 ~ 8,
+      TRUE ~ NA_real_
     )
   ) %>%
   filter(
     !is.na(Time),
+    !is.na(Visit_position),
     !is.na(`CD19_celler_per_µL`)
   )
 
 
 # ------------------------------------------------------------
-# 9.2 Check maximum CD19 value
+# 9.2 Number of participants measured at each time point
+# ------------------------------------------------------------
+
+figure2_n <- figure2_data %>%
+  group_by(
+    Time,
+    Visit_position
+  ) %>%
+  summarise(
+    N = n(),
+    .groups = "drop"
+  )
+
+
+figure2_x_labels <- paste0(
+  figure2_n$Time,
+  "\n",
+  "n = ",
+  figure2_n$N
+)
+
+
+# ------------------------------------------------------------
+# 9.3 Check maximum CD19 value
 # ------------------------------------------------------------
 
 max(
@@ -667,13 +703,13 @@ max(
 
 
 # ------------------------------------------------------------
-# 9.3 Create Figure 2
+# 9.4 Create Figure 2
 # ------------------------------------------------------------
 
 p2 <- ggplot(
   figure2_data,
   aes(
-    x = Time,
+    x = Visit_position,
     y = `CD19_celler_per_µL`
   )
 ) +
@@ -681,9 +717,9 @@ p2 <- ggplot(
   # Boxplots
   geom_boxplot(
     aes(
-      group = factor(Time)
+      group = factor(Visit_position)
     ),
-    width = 2.2,
+    width = 0.55,
     fill = "#FFC266",
     color = "darkorange",
     linewidth = 0.8,
@@ -692,7 +728,7 @@ p2 <- ggplot(
   
   # Individual participant measurements
   geom_jitter(
-    width = 0.6,
+    width = 0.15,
     height = 0,
     shape = 21,
     size = 2.0,
@@ -711,10 +747,8 @@ p2 <- ggplot(
   ) +
   
   scale_x_continuous(
-    breaks = c(
-      0, 3, 6, 12,
-      18, 24, 30, 36
-    )
+    breaks = 1:8,
+    labels = figure2_x_labels
   ) +
   
   scale_y_continuous(
@@ -726,7 +760,7 @@ p2 <- ggplot(
   ) +
   
   coord_cartesian(
-    xlim = c(-1.5, 37.5),
+    xlim = c(0.7, 8.3),
     ylim = c(0, 800),
     expand = FALSE
   ) +
@@ -756,6 +790,13 @@ p2 <- ggplot(
       color = "black",
       size = 11
     ),
+    axis.text.x = element_text(
+      lineheight = 1.3,
+      margin = margin(t = 6)
+    ),
+    axis.title.x = element_text(
+      margin = margin(t = 10)
+    ),
     panel.grid.major.x = element_blank(),
     panel.grid.minor.x = element_blank(),
     panel.grid.minor.y = element_blank(),
@@ -774,14 +815,14 @@ p2 <- ggplot(
 
 
 # ------------------------------------------------------------
-# 9.4 Display Figure 2
+# 9.5 Display Figure 2
 # ------------------------------------------------------------
 
 print(p2)
 
 
 # ------------------------------------------------------------
-# 9.5 Export Figure 2
+# 9.6 Export Figure 2
 # ------------------------------------------------------------
 
 ggsave(
@@ -811,7 +852,7 @@ ggsave(
 
 
 # ------------------------------------------------------------
-# 9.6 Confirm exports
+# 9.7 Confirm exports
 # ------------------------------------------------------------
 
 file.exists(
@@ -827,6 +868,7 @@ file.exists(
     "Figure_2_CD19_B_cells.tiff"
   )
 )
+
 
 # ============================================================
 # 10. FIGURE 3. PROPORTION OF PARTICIPANTS WITH B-CELL
@@ -1211,6 +1253,7 @@ file.exists(
   )
 )
 
+
 # ============================================================
 # 11. FIGURE 4. MEDIAN CD19+ B-CELL COUNTS OVER TIME
 #     BY TREATMENT GROUP
@@ -1280,7 +1323,27 @@ figure4_data
 
 
 # ------------------------------------------------------------
-# 11.3 Create equally spaced visit positions
+# 11.3 Number of participants measured at each time point
+# ------------------------------------------------------------
+
+figure4_n <- figure4_data %>%
+  group_by(Time) %>%
+  summarise(
+    N_total = sum(N),
+    .groups = "drop"
+  )
+
+
+figure4_x_labels <- paste0(
+  figure4_n$Time,
+  "\n",
+  "n = ",
+  figure4_n$N_total
+)
+
+
+# ------------------------------------------------------------
+# 11.4 Create equally spaced visit positions
 # ------------------------------------------------------------
 
 figure4_data <- figure4_data %>%
@@ -1302,7 +1365,7 @@ figure4_data <- figure4_data %>%
 
 
 # ------------------------------------------------------------
-# 11.4 Check plotting positions
+# 11.5 Check plotting positions
 # ------------------------------------------------------------
 
 figure4_data %>%
@@ -1318,7 +1381,7 @@ figure4_data %>%
 
 
 # ------------------------------------------------------------
-# 11.5 Colors
+# 11.6 Colors
 # ------------------------------------------------------------
 
 ocrelizumab_col <- "#2166AC"
@@ -1326,7 +1389,7 @@ rituximab_col <- "darkorange"
 
 
 # ------------------------------------------------------------
-# 11.6 Create Figure 4
+# 11.7 Create Figure 4
 # ------------------------------------------------------------
 
 p4 <- ggplot(
@@ -1383,15 +1446,7 @@ p4 <- ggplot(
   # X-axis
   scale_x_continuous(
     breaks = 1:7,
-    labels = c(
-      "3",
-      "6",
-      "12",
-      "18",
-      "24",
-      "30",
-      "36"
-    )
+    labels = figure4_x_labels
   ) +
   
   # Y-axis
@@ -1444,6 +1499,13 @@ p4 <- ggplot(
       color = "black",
       size = 11
     ),
+    axis.text.x = element_text(
+      lineheight = 1.3,
+      margin = margin(t = 6)
+    ),
+    axis.title.x = element_text(
+      margin = margin(t = 10)
+    ),
     legend.position = "top",
     legend.text = element_text(
       family = "serif",
@@ -1468,14 +1530,14 @@ p4 <- ggplot(
 
 
 # ------------------------------------------------------------
-# 11.7 Display Figure 4
+# 11.8 Display Figure 4
 # ------------------------------------------------------------
 
 print(p4)
 
 
 # ------------------------------------------------------------
-# 11.8 Export Figure 4
+# 11.9 Export Figure 4
 # ------------------------------------------------------------
 
 ggsave(
@@ -1505,7 +1567,7 @@ ggsave(
 
 
 # ------------------------------------------------------------
-# 11.9 Confirm exports
+# 11.10 Confirm exports
 # ------------------------------------------------------------
 
 file.exists(
@@ -1521,6 +1583,7 @@ file.exists(
     "Figure_4_CD19_Median_IQR_by_Treatment.tiff"
   )
 )
+
 
 # ============================================================
 # 12. SUPPLEMENTARY FIGURE 1.
@@ -1598,7 +1661,23 @@ supp_fig1_summary <- supp_fig1_data %>%
 
 
 # ------------------------------------------------------------
-# 12.4 Checks
+# 12.4 X-axis labels
+# Month on first line and number measured below
+# ------------------------------------------------------------
+
+supp_fig1_x_labels <- setNames(
+  paste0(
+    supp_fig1_summary$Time,
+    "\n",
+    "n = ",
+    supp_fig1_summary$N
+  ),
+  supp_fig1_summary$Time
+)
+
+
+# ------------------------------------------------------------
+# 12.5 Checks
 # ------------------------------------------------------------
 
 supp_fig1_summary
@@ -1614,7 +1693,7 @@ max(
 
 
 # ------------------------------------------------------------
-# 12.5 Colors
+# 12.6 Colors
 # ------------------------------------------------------------
 
 individual_col <- "#2166AC"
@@ -1623,7 +1702,7 @@ mean_fill <- "#FFC266"
 
 
 # ------------------------------------------------------------
-# 12.6 Create Supplementary Figure 1
+# 12.7 Create Supplementary Figure 1
 # ------------------------------------------------------------
 
 supp_fig1 <- ggplot() +
@@ -1688,7 +1767,8 @@ supp_fig1 <- ggplot() +
     breaks = c(
       0, 3, 6, 12,
       18, 24, 30, 36
-    )
+    ),
+    labels = supp_fig1_x_labels
   ) +
   
   scale_y_continuous(
@@ -1730,6 +1810,13 @@ supp_fig1 <- ggplot() +
       color = "black",
       size = 11
     ),
+    axis.text.x = element_text(
+      lineheight = 1.3,
+      margin = margin(t = 6)
+    ),
+    axis.title.x = element_text(
+      margin = margin(t = 10)
+    ),
     panel.grid.major.x = element_blank(),
     panel.grid.minor.x = element_blank(),
     panel.grid.minor.y = element_blank(),
@@ -1748,14 +1835,14 @@ supp_fig1 <- ggplot() +
 
 
 # ------------------------------------------------------------
-# 12.7 Display Supplementary Figure 1
+# 12.8 Display Supplementary Figure 1
 # ------------------------------------------------------------
 
 print(supp_fig1)
 
 
 # ------------------------------------------------------------
-# 12.8 Export Supplementary Figure 1
+# 12.9 Export Supplementary Figure 1
 # ------------------------------------------------------------
 
 ggsave(
@@ -1785,7 +1872,7 @@ ggsave(
 
 
 # ------------------------------------------------------------
-# 12.9 Confirm exports
+# 12.10 Confirm exports
 # ------------------------------------------------------------
 
 file.exists(
@@ -1801,6 +1888,7 @@ file.exists(
     "Supplementary_Figure_1_Non_Sustained_Depletion.tiff"
   )
 )
+
 
 # ============================================================
 # 13. SUPPLEMENTARY FIGURE 2.
@@ -1878,7 +1966,23 @@ supp_fig2_summary <- supp_fig2_data %>%
 
 
 # ------------------------------------------------------------
-# 13.4 Checks
+# 13.4 X-axis labels
+# Month on first line and number measured below
+# ------------------------------------------------------------
+
+supp_fig2_x_labels <- setNames(
+  paste0(
+    supp_fig2_summary$Time,
+    "\n",
+    "n = ",
+    supp_fig2_summary$N
+  ),
+  supp_fig2_summary$Time
+)
+
+
+# ------------------------------------------------------------
+# 13.5 Checks
 # ------------------------------------------------------------
 
 supp_fig2_summary
@@ -1894,7 +1998,7 @@ max(
 
 
 # ------------------------------------------------------------
-# 13.5 Colors
+# 13.6 Colors
 # ------------------------------------------------------------
 
 individual_col <- "#2166AC"
@@ -1903,7 +2007,7 @@ mean_fill <- "#FFC266"
 
 
 # ------------------------------------------------------------
-# 13.6 Create Supplementary Figure 2
+# 13.7 Create Supplementary Figure 2
 # ------------------------------------------------------------
 
 supp_fig2 <- ggplot() +
@@ -1968,7 +2072,8 @@ supp_fig2 <- ggplot() +
     breaks = c(
       0, 3, 6, 12,
       18, 24, 30, 36
-    )
+    ),
+    labels = supp_fig2_x_labels
   ) +
   
   scale_y_continuous(
@@ -2010,6 +2115,13 @@ supp_fig2 <- ggplot() +
       color = "black",
       size = 11
     ),
+    axis.text.x = element_text(
+      lineheight = 1.3,
+      margin = margin(t = 6)
+    ),
+    axis.title.x = element_text(
+      margin = margin(t = 10)
+    ),
     panel.grid.major.x = element_blank(),
     panel.grid.minor.x = element_blank(),
     panel.grid.minor.y = element_blank(),
@@ -2028,14 +2140,14 @@ supp_fig2 <- ggplot() +
 
 
 # ------------------------------------------------------------
-# 13.7 Display Supplementary Figure 2
+# 13.8 Display Supplementary Figure 2
 # ------------------------------------------------------------
 
 print(supp_fig2)
 
 
 # ------------------------------------------------------------
-# 13.8 Export Supplementary Figure 2
+# 13.9 Export Supplementary Figure 2
 # ------------------------------------------------------------
 
 ggsave(
@@ -2065,7 +2177,7 @@ ggsave(
 
 
 # ------------------------------------------------------------
-# 13.9 Confirm exports
+# 13.10 Confirm exports
 # ------------------------------------------------------------
 
 file.exists(

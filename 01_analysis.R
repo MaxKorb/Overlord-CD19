@@ -445,6 +445,7 @@ table(
   useNA = "ifany"
 )
 
+
 # ============================================================
 # 9. FOLLOW-UP DURATION AND DATA COMPLETENESS
 # ============================================================
@@ -535,7 +536,127 @@ round_half_up(
 
 
 # ------------------------------------------------------------
-# 9.3 Availability at month 36
+# 9.3 Overall availability across all scheduled visits
+#     including baseline
+# ------------------------------------------------------------
+
+total_available_all_visits <- sum(
+  !is.na(ny_tabell$`CD19_celler_per_µL`)
+)
+
+total_scheduled_all_visits <-
+  n_distinct(ny_tabell$PasientID) * 8
+
+overall_availability_all_visits <- 100 *
+  total_available_all_visits /
+  total_scheduled_all_visits
+
+
+total_available_all_visits
+
+total_scheduled_all_visits
+
+round_half_up(
+  overall_availability_all_visits,
+  1
+)
+
+# ------------------------------------------------------------
+# 9.4 Data completeness among participants not achieving
+#     sustained depletion
+# ------------------------------------------------------------
+
+non_sustained_ids <- pasienter_sustained %>%
+  filter(
+    Deplesjon_status == "Ikke-deplesjon"
+  ) %>%
+  pull(PasientID)
+
+
+non_sustained_available <- ny_tabell %>%
+  filter(
+    PasientID %in% non_sustained_ids
+  ) %>%
+  summarise(
+    N_available = sum(
+      !is.na(`CD19_celler_per_µL`)
+    )
+  ) %>%
+  pull(N_available)
+
+
+non_sustained_scheduled <-
+  length(non_sustained_ids) * 8
+
+
+non_sustained_availability <- 100 *
+  non_sustained_available /
+  non_sustained_scheduled
+
+
+length(
+  non_sustained_ids
+)
+
+non_sustained_available
+
+non_sustained_scheduled
+
+round_half_up(
+  non_sustained_availability,
+  1
+)
+
+
+# ------------------------------------------------------------
+# 9.5 Data completeness among participants not achieving
+#     early depletion
+# ------------------------------------------------------------
+
+non_early_ids <- pasienter_early %>%
+  filter(
+    Deplesjon_status == "Ikke-depletert"
+  ) %>%
+  pull(PasientID)
+
+
+non_early_available <- ny_tabell %>%
+  filter(
+    PasientID %in% non_early_ids
+  ) %>%
+  summarise(
+    N_available = sum(
+      !is.na(`CD19_celler_per_µL`)
+    )
+  ) %>%
+  pull(N_available)
+
+
+non_early_scheduled <-
+  length(non_early_ids) * 8
+
+
+non_early_availability <- 100 *
+  non_early_available /
+  non_early_scheduled
+
+
+length(
+  non_early_ids
+)
+
+non_early_available
+
+non_early_scheduled
+
+round_half_up(
+  non_early_availability,
+  1
+)
+
+
+# ------------------------------------------------------------
+# 9.6 Availability at month 36
 # ------------------------------------------------------------
 
 month36_available <- availability_by_visit %>%
@@ -547,7 +668,7 @@ month36_available
 
 
 # ------------------------------------------------------------
-# 9.4 Duration of CD19 follow-up
+# 9.7 Duration of CD19 follow-up
 # ------------------------------------------------------------
 
 last_followup <- followup_data %>%
@@ -588,6 +709,7 @@ round_half_up(
   sd_followup,
   2
 )
+
 
 # ============================================================
 # 10. BASELINE DEMOGRAPHICS OF THE FINAL ANALYSIS COHORT
