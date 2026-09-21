@@ -2548,10 +2548,406 @@ file.exists(
 # ============================================================
 # 21. SUPPLEMENTARY TABLE 1:
 # BASELINE CHARACTERISTICS BY TREATMENT AND
-# SUSTAINED DEPLETION STATUS
+# EARLY DEPLETION STATUS
 # ============================================================
 
 # Supplementary Table 1 presents baseline characteristics
+# stratified by treatment and early depletion status.
+#
+# Continuous variables are summarised as mean ± SD.
+# Categorical variables are summarised as n (%).
+#
+# No inferential predictor analyses are performed for early
+# depletion because only four participants were non-depleted
+# at month 3.
+
+
+# ------------------------------------------------------------
+# 21.1 Create the four analysis groups
+# ------------------------------------------------------------
+
+rtx_early_nondepleted <- pasienter_early %>%
+  filter(
+    Behandling == "Rituximab",
+    Deplesjon_status == "Ikke-depletert"
+  )
+
+
+rtx_early_depleted <- pasienter_early %>%
+  filter(
+    Behandling == "Rituximab",
+    Deplesjon_status == "Depletert"
+  )
+
+
+ocr_early_nondepleted <- pasienter_early %>%
+  filter(
+    Behandling == "Ocrelizumab",
+    Deplesjon_status == "Ikke-depletert"
+  )
+
+
+ocr_early_depleted <- pasienter_early %>%
+  filter(
+    Behandling == "Ocrelizumab",
+    Deplesjon_status == "Depletert"
+  )
+
+
+# ------------------------------------------------------------
+# 21.2 Check group sizes
+# ------------------------------------------------------------
+
+nrow(rtx_early_nondepleted)
+nrow(rtx_early_depleted)
+nrow(ocr_early_nondepleted)
+nrow(ocr_early_depleted)
+
+
+# Expected:
+# Rituximab non-depletion = 4
+# Rituximab depletion = 63
+# Ocrelizumab non-depletion = 0
+# Ocrelizumab depletion = 27
+
+
+# ------------------------------------------------------------
+# 21.3 Helper functions that also handle empty groups
+# ------------------------------------------------------------
+
+mean_sd_supp1 <- function(
+    data,
+    variable
+) {
+  
+  if (nrow(data) == 0) {
+    return("—")
+  }
+  
+  x <- data[[variable]]
+  x <- x[!is.na(x)]
+  
+  if (length(x) == 0) {
+    return("—")
+  }
+  
+  mean_value <- round_half_up(
+    mean(x),
+    digits = 1
+  )
+  
+  sd_value <- round_half_up(
+    sd(x),
+    digits = 1
+  )
+  
+  sprintf(
+    "%.1f ± %.1f",
+    mean_value,
+    sd_value
+  )
+}
+
+
+n_pct_supp1 <- function(
+    data,
+    variable,
+    value
+) {
+  
+  if (nrow(data) == 0) {
+    return("—")
+  }
+  
+  x <- data[[variable]]
+  x <- x[!is.na(x)]
+  
+  if (length(x) == 0) {
+    return("—")
+  }
+  
+  n <- sum(
+    x == value
+  )
+  
+  pct <- round_half_up(
+    100 * n / length(x),
+    digits = 1
+  )
+  
+  sprintf(
+    "%d (%.1f)",
+    n,
+    pct
+  )
+}
+
+
+# ------------------------------------------------------------
+# 21.4 Helper function for one Supplementary Table 1 column
+# ------------------------------------------------------------
+
+create_supp1_column <- function(data) {
+  
+  c(
+    
+    # Number of participants
+    ifelse(
+      nrow(data) == 0,
+      "0",
+      as.character(
+        nrow(data)
+      )
+    ),
+    
+    # Section heading
+    "",
+    
+    # Demographics and lifestyle
+    mean_sd_supp1(
+      data,
+      "Alder_(år)"
+    ),
+    
+    n_pct_supp1(
+      data,
+      "Kjønn",
+      "Female"
+    ),
+    
+    n_pct_supp1(
+      data,
+      "Kjønn",
+      "Male"
+    ),
+    
+    mean_sd_supp1(
+      data,
+      "BMI"
+    ),
+    
+    n_pct_supp1(
+      data,
+      "Røyk",
+      1
+    ),
+    
+    n_pct_supp1(
+      data,
+      "Snus",
+      "Ja"
+    ),
+    
+    n_pct_supp1(
+      data,
+      "Alkohol_bruk",
+      1
+    ),
+    
+    # Section heading
+    "",
+    
+    # Baseline disease characteristics
+    mean_sd_supp1(
+      data,
+      "Tid_siden_MS_diagnose_(måneder)"
+    ),
+    
+    mean_sd_supp1(
+      data,
+      "Tid_siden_første_kliniske_hendelse_(måneder)"
+    ),
+    
+    mean_sd_supp1(
+      data,
+      "Minimum_EDSS_score"
+    ),
+    
+    mean_sd_supp1(
+      data,
+      "Total_antall_attakker"
+    ),
+    
+    mean_sd_supp1(
+      data,
+      "Antall_attakker_siste_året"
+    ),
+    
+    n_pct_supp1(
+      data,
+      "Cerebrospinalvæske_analysert_for_oligoklonale_bånd",
+      "Ja"
+    ),
+    
+    mean_sd_supp1(
+      data,
+      "Antall_oligoklonale_bånd"
+    ),
+    
+    # Section heading
+    "",
+    
+    # Baseline laboratory values
+    mean_sd_supp1(
+      data,
+      "IgG"
+    ),
+    
+    mean_sd_supp1(
+      data,
+      "IgM"
+    ),
+    
+    mean_sd_supp1(
+      data,
+      "CD19_%"
+    ),
+    
+    mean_sd_supp1(
+      data,
+      "CD19_celler_per_µL"
+    ),
+    
+    n_pct_supp1(
+      data,
+      "CRP_below_1",
+      1
+    )
+  )
+}
+
+
+# ------------------------------------------------------------
+# 21.5 Create Supplementary Table 1
+# ------------------------------------------------------------
+
+supplementary_table1 <- data.frame(
+  
+  Characteristic = c(
+    
+    "Number of participants, n",
+    
+    "Demographics and Lifestyle Characteristics",
+    
+    "Age, years, mean (±SD)",
+    
+    "Sex, female, n (%)",
+    
+    "Sex, male, n (%)",
+    
+    "Body Mass Index, kg/m², mean (±SD)",
+    
+    "Current use of smoked tobacco, n (%)",
+    
+    "Current use of smokeless tobacco (e.g. snuff), n (%)",
+    
+    "Current use of alcohol, n (%)",
+    
+    "Baseline Disease Characteristics",
+    
+    "Time since MS diagnosis, months, mean (±SD)",
+    
+    "Time since first neurological symptom, months, mean (±SD)",
+    
+    "Minimum EDSS score, mean (±SD)",
+    
+    "Total relapses since onset, mean (±SD)",
+    
+    "Relapses in the past 12 months, mean (±SD)",
+    
+    "CSF oligoclonal bands tested, n (%)",
+    
+    "CSF oligoclonal bands, mean (±SD)",
+    
+    "Baseline Laboratory Values",
+    
+    "IgG, g/L, mean (±SD)",
+    
+    "IgM, g/L, mean (±SD)",
+    
+    "CD19+ B cells, % of lymphocytes, mean (±SD)",
+    
+    "CD19+ B cells, cells/µL, mean (±SD)",
+    
+    "CRP < 1 mg/L, n (%)"
+  ),
+  
+  
+  `Rituximab - Non-depletion` =
+    create_supp1_column(
+      rtx_early_nondepleted
+    ),
+  
+  `Rituximab - Depletion` =
+    create_supp1_column(
+      rtx_early_depleted
+    ),
+  
+  `Ocrelizumab - Non-depletion` =
+    create_supp1_column(
+      ocr_early_nondepleted
+    ),
+  
+  `Ocrelizumab - Depletion` =
+    create_supp1_column(
+      ocr_early_depleted
+    ),
+  
+  check.names = FALSE,
+  stringsAsFactors = FALSE
+)
+
+
+# ------------------------------------------------------------
+# 21.6 Display Supplementary Table 1
+# ------------------------------------------------------------
+
+supplementary_table1
+
+
+# ------------------------------------------------------------
+# 21.7 Export Supplementary Table 1
+# ------------------------------------------------------------
+
+# CSV
+write.csv(
+  supplementary_table1,
+  file = "output/Supplementary_Table_1.csv",
+  row.names = FALSE,
+  fileEncoding = "UTF-8"
+)
+
+
+# Excel
+openxlsx::write.xlsx(
+  supplementary_table1,
+  file = "output/Supplementary_Table_1.xlsx",
+  rowNames = FALSE,
+  overwrite = TRUE
+)
+
+
+# ------------------------------------------------------------
+# 21.8 Check exports
+# ------------------------------------------------------------
+
+file.exists(
+  "output/Supplementary_Table_1.csv"
+)
+
+file.exists(
+  "output/Supplementary_Table_1.xlsx"
+)
+
+
+
+# ============================================================
+# 22. SUPPLEMENTARY TABLE 2:
+# BASELINE CHARACTERISTICS BY TREATMENT AND
+# SUSTAINED DEPLETION STATUS
+# ============================================================
+
+# Supplementary Table 2 presents baseline characteristics
 # stratified by treatment and sustained depletion status.
 #
 # Continuous variables are summarised as mean ± SD.
@@ -2559,7 +2955,7 @@ file.exists(
 
 
 # ------------------------------------------------------------
-# 21.1 Create the four analysis groups
+# 22.1 Create the four analysis groups
 # ------------------------------------------------------------
 
 rtx_nondepleted <- pasienter_sustained %>%
@@ -2591,7 +2987,7 @@ ocr_depleted <- pasienter_sustained %>%
 
 
 # ------------------------------------------------------------
-# 21.2 Check group sizes
+# 22.2 Check group sizes
 # ------------------------------------------------------------
 
 nrow(rtx_nondepleted)
@@ -2608,10 +3004,10 @@ nrow(ocr_depleted)
 
 
 # ------------------------------------------------------------
-# 21.3 Helper function for one Supplementary Table 1 column
+# 22.3 Helper function for one Supplementary Table 2 column
 # ------------------------------------------------------------
 
-create_supp1_column <- function(data) {
+create_supp2_column <- function(data) {
   
   c(
     
@@ -2738,10 +3134,10 @@ create_supp1_column <- function(data) {
 
 
 # ------------------------------------------------------------
-# 21.4 Create Supplementary Table 1
+# 22.4 Create Supplementary Table 2
 # ------------------------------------------------------------
 
-supplementary_table1 <- data.frame(
+supplementary_table2 <- data.frame(
   
   Characteristic = c(
     
@@ -2794,22 +3190,22 @@ supplementary_table1 <- data.frame(
   
   
   `Rituximab - Non-depletion` =
-    create_supp1_column(
+    create_supp2_column(
       rtx_nondepleted
     ),
   
   `Rituximab - Depletion` =
-    create_supp1_column(
+    create_supp2_column(
       rtx_depleted
     ),
   
   `Ocrelizumab - Non-depletion` =
-    create_supp1_column(
+    create_supp2_column(
       ocr_nondepleted
     ),
   
   `Ocrelizumab - Depletion` =
-    create_supp1_column(
+    create_supp2_column(
       ocr_depleted
     ),
   
@@ -2819,409 +3215,17 @@ supplementary_table1 <- data.frame(
 
 
 # ------------------------------------------------------------
-# 21.5 Display Supplementary Table 1
-# ------------------------------------------------------------
-
-supplementary_table1
-
-
-# ------------------------------------------------------------
-# 21.6 Export Supplementary Table 1
-# ------------------------------------------------------------
-
-# CSV
-write.csv(
-  supplementary_table1,
-  file = "output/Supplementary_Table_1.csv",
-  row.names = FALSE,
-  fileEncoding = "UTF-8"
-)
-
-
-# Excel
-openxlsx::write.xlsx(
-  supplementary_table1,
-  file = "output/Supplementary_Table_1.xlsx",
-  rowNames = FALSE,
-  overwrite = TRUE
-)
-
-
-# ------------------------------------------------------------
-# 21.7 Check exports
-# ------------------------------------------------------------
-
-file.exists(
-  "output/Supplementary_Table_1.csv"
-)
-
-file.exists(
-  "output/Supplementary_Table_1.xlsx"
-)
-
-# ============================================================
-# 22. SUPPLEMENTARY TABLE 2:
-# BASELINE CHARACTERISTICS BY TREATMENT AND
-# EARLY DEPLETION STATUS
-# ============================================================
-
-# Supplementary Table 2 presents baseline characteristics
-# stratified by treatment and early depletion status.
-#
-# Continuous variables are summarised as mean ± SD.
-# Categorical variables are summarised as n (%).
-#
-# No inferential predictor analyses are performed for early
-# depletion because only four participants were non-depleted
-# at month 3.
-
-
-# ------------------------------------------------------------
-# 22.1 Create the four analysis groups
-# ------------------------------------------------------------
-
-rtx_early_nondepleted <- pasienter_early %>%
-  filter(
-    Behandling == "Rituximab",
-    Deplesjon_status == "Ikke-depletert"
-  )
-
-
-rtx_early_depleted <- pasienter_early %>%
-  filter(
-    Behandling == "Rituximab",
-    Deplesjon_status == "Depletert"
-  )
-
-
-ocr_early_nondepleted <- pasienter_early %>%
-  filter(
-    Behandling == "Ocrelizumab",
-    Deplesjon_status == "Ikke-depletert"
-  )
-
-
-ocr_early_depleted <- pasienter_early %>%
-  filter(
-    Behandling == "Ocrelizumab",
-    Deplesjon_status == "Depletert"
-  )
-
-
-# ------------------------------------------------------------
-# 22.2 Check group sizes
-# ------------------------------------------------------------
-
-nrow(rtx_early_nondepleted)
-nrow(rtx_early_depleted)
-nrow(ocr_early_nondepleted)
-nrow(ocr_early_depleted)
-
-# Expected:
-# Rituximab non-depletion = 4
-# Rituximab depletion = 63
-# Ocrelizumab non-depletion = 0
-# Ocrelizumab depletion = 27
-
-
-# ------------------------------------------------------------
-# 22.3 Helper functions that also handle empty groups
-# ------------------------------------------------------------
-
-mean_sd_supp2 <- function(
-    data,
-    variable
-) {
-  
-  if (nrow(data) == 0) {
-    return("—")
-  }
-  
-  x <- data[[variable]]
-  x <- x[!is.na(x)]
-  
-  if (length(x) == 0) {
-    return("—")
-  }
-  
-  mean_value <- round_half_up(
-    mean(x),
-    digits = 1
-  )
-  
-  sd_value <- round_half_up(
-    sd(x),
-    digits = 1
-  )
-  
-  sprintf(
-    "%.1f ± %.1f",
-    mean_value,
-    sd_value
-  )
-}
-
-
-n_pct_supp2 <- function(
-    data,
-    variable,
-    value
-) {
-  
-  if (nrow(data) == 0) {
-    return("—")
-  }
-  
-  x <- data[[variable]]
-  x <- x[!is.na(x)]
-  
-  if (length(x) == 0) {
-    return("—")
-  }
-  
-  n <- sum(
-    x == value
-  )
-  
-  pct <- round_half_up(
-    100 * n / length(x),
-    digits = 1
-  )
-  
-  sprintf(
-    "%d (%.1f)",
-    n,
-    pct
-  )
-}
-
-
-# ------------------------------------------------------------
-# 22.4 Helper function for one Supplementary Table 2 column
-# ------------------------------------------------------------
-
-create_supp2_column <- function(data) {
-  
-  c(
-    
-    # Number of participants
-    ifelse(
-      nrow(data) == 0,
-      "0",
-      as.character(
-        nrow(data)
-      )
-    ),
-    
-    # Section heading
-    "",
-    
-    # Demographics and lifestyle
-    mean_sd_supp2(
-      data,
-      "Alder_(år)"
-    ),
-    
-    n_pct_supp2(
-      data,
-      "Kjønn",
-      "Female"
-    ),
-    
-    n_pct_supp2(
-      data,
-      "Kjønn",
-      "Male"
-    ),
-    
-    mean_sd_supp2(
-      data,
-      "BMI"
-    ),
-    
-    n_pct_supp2(
-      data,
-      "Røyk",
-      1
-    ),
-    
-    n_pct_supp2(
-      data,
-      "Snus",
-      "Ja"
-    ),
-    
-    n_pct_supp2(
-      data,
-      "Alkohol_bruk",
-      1
-    ),
-    
-    # Section heading
-    "",
-    
-    # Baseline disease characteristics
-    mean_sd_supp2(
-      data,
-      "Tid_siden_MS_diagnose_(måneder)"
-    ),
-    
-    mean_sd_supp2(
-      data,
-      "Tid_siden_første_kliniske_hendelse_(måneder)"
-    ),
-    
-    mean_sd_supp2(
-      data,
-      "Minimum_EDSS_score"
-    ),
-    
-    mean_sd_supp2(
-      data,
-      "Total_antall_attakker"
-    ),
-    
-    mean_sd_supp2(
-      data,
-      "Antall_attakker_siste_året"
-    ),
-    
-    n_pct_supp2(
-      data,
-      "Cerebrospinalvæske_analysert_for_oligoklonale_bånd",
-      "Ja"
-    ),
-    
-    mean_sd_supp2(
-      data,
-      "Antall_oligoklonale_bånd"
-    ),
-    
-    # Section heading
-    "",
-    
-    # Baseline laboratory values
-    mean_sd_supp2(
-      data,
-      "IgG"
-    ),
-    
-    mean_sd_supp2(
-      data,
-      "IgM"
-    ),
-    
-    mean_sd_supp2(
-      data,
-      "CD19_%"
-    ),
-    
-    mean_sd_supp2(
-      data,
-      "CD19_celler_per_µL"
-    ),
-    
-    n_pct_supp2(
-      data,
-      "CRP_below_1",
-      1
-    )
-  )
-}
-
-
-# ------------------------------------------------------------
-# 22.5 Create Supplementary Table 2
-# ------------------------------------------------------------
-
-supplementary_table2 <- data.frame(
-  
-  Characteristic = c(
-    
-    "Number of participants, n",
-    
-    "Demographics and Lifestyle Characteristics",
-    
-    "Age, years, mean (±SD)",
-    
-    "Sex, female, n (%)",
-    
-    "Sex, male, n (%)",
-    
-    "Body Mass Index, kg/m², mean (±SD)",
-    
-    "Current use of smoked tobacco, n (%)",
-    
-    "Current use of smokeless tobacco (e.g. snuff), n (%)",
-    
-    "Current use of alcohol, n (%)",
-    
-    "Baseline Disease Characteristics",
-    
-    "Time since MS diagnosis, months, mean (±SD)",
-    
-    "Time since first neurological symptom, months, mean (±SD)",
-    
-    "Minimum EDSS score, mean (±SD)",
-    
-    "Total relapses since onset, mean (±SD)",
-    
-    "Relapses in the past 12 months, mean (±SD)",
-    
-    "CSF oligoclonal bands tested, n (%)",
-    
-    "CSF oligoclonal bands, mean (±SD)",
-    
-    "Baseline Laboratory Values",
-    
-    "IgG, g/L, mean (±SD)",
-    
-    "IgM, g/L, mean (±SD)",
-    
-    "CD19+ B cells, % of lymphocytes, mean (±SD)",
-    
-    "CD19+ B cells, cells/µL, mean (±SD)",
-    
-    "CRP < 1 mg/L, n (%)"
-  ),
-  
-  
-  `Rituximab - Non-depletion` =
-    create_supp2_column(
-      rtx_early_nondepleted
-    ),
-  
-  `Rituximab - Depletion` =
-    create_supp2_column(
-      rtx_early_depleted
-    ),
-  
-  `Ocrelizumab - Non-depletion` =
-    create_supp2_column(
-      ocr_early_nondepleted
-    ),
-  
-  `Ocrelizumab - Depletion` =
-    create_supp2_column(
-      ocr_early_depleted
-    ),
-  
-  check.names = FALSE,
-  stringsAsFactors = FALSE
-)
-
-
-# ------------------------------------------------------------
-# 22.6 Display Supplementary Table 2
+# 22.5 Display Supplementary Table 2
 # ------------------------------------------------------------
 
 supplementary_table2
 
 
 # ------------------------------------------------------------
-# 22.7 Export Supplementary Table 2
+# 22.6 Export Supplementary Table 2
 # ------------------------------------------------------------
 
+# CSV
 write.csv(
   supplementary_table2,
   file = "output/Supplementary_Table_2.csv",
@@ -3230,6 +3234,7 @@ write.csv(
 )
 
 
+# Excel
 openxlsx::write.xlsx(
   supplementary_table2,
   file = "output/Supplementary_Table_2.xlsx",
@@ -3239,7 +3244,7 @@ openxlsx::write.xlsx(
 
 
 # ------------------------------------------------------------
-# 22.8 Check exports
+# 22.7 Check exports
 # ------------------------------------------------------------
 
 file.exists(
