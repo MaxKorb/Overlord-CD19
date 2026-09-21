@@ -10,9 +10,9 @@
 #   - Figure 3: Proportion of participants with B-cell depletion over time
 #   - Figure 4: Median CD19+ B-cell counts over time by treatment
 #   - Supplementary Figure 1: Longitudinal trajectories among participants
-#     not achieving sustained depletion
-#   - Supplementary Figure 2: Longitudinal trajectories among participants
 #     not achieving early depletion
+#   - Supplementary Figure 2: Longitudinal trajectories among participants
+#     not achieving sustained depletion
 #
 # ============================================================
 
@@ -1588,17 +1588,17 @@ file.exists(
 # ============================================================
 # 12. SUPPLEMENTARY FIGURE 1.
 #     LONGITUDINAL TRAJECTORIES OF CD19+ B-CELL COUNTS
-#     AMONG PARTICIPANTS NOT ACHIEVING SUSTAINED DEPLETION
+#     AMONG PARTICIPANTS NOT ACHIEVING EARLY DEPLETION
 # ============================================================
 
 
 # ------------------------------------------------------------
-# 12.1 Identify participants not achieving sustained depletion
+# 12.1 Identify participants not achieving early depletion
 # ------------------------------------------------------------
 
-non_sustained_ids <- pasienter_sustained %>%
+non_early_ids <- pasienter_early %>%
   filter(
-    Deplesjon_status == "Ikke-deplesjon"
+    Deplesjon_status == "Ikke-depletert"
   ) %>%
   pull(PasientID)
 
@@ -1609,7 +1609,7 @@ non_sustained_ids <- pasienter_sustained %>%
 
 supp_fig1_data <- ny_tabell %>%
   filter(
-    PasientID %in% non_sustained_ids,
+    PasientID %in% non_early_ids,
     !is.na(`CD19_celler_per_µL`)
   ) %>%
   mutate(
@@ -1774,14 +1774,14 @@ supp_fig1 <- ggplot() +
   scale_y_continuous(
     breaks = seq(
       0,
-      800,
+      500,
       by = 100
     )
   ) +
   
   coord_cartesian(
     xlim = c(-1, 37),
-    ylim = c(0, 800),
+    ylim = c(0, 500),
     expand = FALSE
   ) +
   
@@ -1848,7 +1848,7 @@ print(supp_fig1)
 ggsave(
   filename = file.path(
     figure_output_dir,
-    "Supplementary_Figure_1_Non_Sustained_Depletion.pdf"
+    "Supplementary_Figure_1_Early_Non_Depletion.pdf"
   ),
   plot = supp_fig1,
   width = 8.5,
@@ -1860,7 +1860,7 @@ ggsave(
 ggsave(
   filename = file.path(
     figure_output_dir,
-    "Supplementary_Figure_1_Non_Sustained_Depletion.tiff"
+    "Supplementary_Figure_1_Early_Non_Depletion.tiff"
   ),
   plot = supp_fig1,
   width = 8.5,
@@ -1878,32 +1878,33 @@ ggsave(
 file.exists(
   file.path(
     figure_output_dir,
-    "Supplementary_Figure_1_Non_Sustained_Depletion.pdf"
+    "Supplementary_Figure_1_Early_Non_Depletion.pdf"
   )
 )
 
 file.exists(
   file.path(
     figure_output_dir,
-    "Supplementary_Figure_1_Non_Sustained_Depletion.tiff"
+    "Supplementary_Figure_1_Early_Non_Depletion.tiff"
   )
 )
+
 
 
 # ============================================================
 # 13. SUPPLEMENTARY FIGURE 2.
 #     LONGITUDINAL TRAJECTORIES OF CD19+ B-CELL COUNTS
-#     AMONG PARTICIPANTS NOT ACHIEVING EARLY DEPLETION
+#     AMONG PARTICIPANTS NOT ACHIEVING SUSTAINED DEPLETION
 # ============================================================
 
 
 # ------------------------------------------------------------
-# 13.1 Identify participants not achieving early depletion
+# 13.1 Identify participants not achieving sustained depletion
 # ------------------------------------------------------------
 
-non_early_ids <- pasienter_early %>%
+non_sustained_ids <- pasienter_sustained %>%
   filter(
-    Deplesjon_status == "Ikke-depletert"
+    Deplesjon_status == "Ikke-deplesjon"
   ) %>%
   pull(PasientID)
 
@@ -1914,7 +1915,7 @@ non_early_ids <- pasienter_early %>%
 
 supp_fig2_data <- ny_tabell %>%
   filter(
-    PasientID %in% non_early_ids,
+    PasientID %in% non_sustained_ids,
     !is.na(`CD19_celler_per_µL`)
   ) %>%
   mutate(
@@ -2079,14 +2080,14 @@ supp_fig2 <- ggplot() +
   scale_y_continuous(
     breaks = seq(
       0,
-      500,
+      800,
       by = 100
     )
   ) +
   
   coord_cartesian(
     xlim = c(-1, 37),
-    ylim = c(0, 500),
+    ylim = c(0, 800),
     expand = FALSE
   ) +
   
@@ -2153,7 +2154,7 @@ print(supp_fig2)
 ggsave(
   filename = file.path(
     figure_output_dir,
-    "Supplementary_Figure_2_Early_Non_Depletion.pdf"
+    "Supplementary_Figure_2_Non_Sustained_Depletion.pdf"
   ),
   plot = supp_fig2,
   width = 8.5,
@@ -2165,7 +2166,7 @@ ggsave(
 ggsave(
   filename = file.path(
     figure_output_dir,
-    "Supplementary_Figure_2_Early_Non_Depletion.tiff"
+    "Supplementary_Figure_2_Non_Sustained_Depletion.tiff"
   ),
   plot = supp_fig2,
   width = 8.5,
@@ -2183,13 +2184,13 @@ ggsave(
 file.exists(
   file.path(
     figure_output_dir,
-    "Supplementary_Figure_2_Early_Non_Depletion.pdf"
+    "Supplementary_Figure_2_Non_Sustained_Depletion.pdf"
   )
 )
 
 file.exists(
   file.path(
     figure_output_dir,
-    "Supplementary_Figure_2_Early_Non_Depletion.tiff"
+    "Supplementary_Figure_2_Non_Sustained_Depletion.tiff"
   )
 )
