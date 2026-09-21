@@ -109,11 +109,11 @@ Tables are exported in both `.csv` and `.xlsx` formats.
 The figure script generates:
 
 - Figure 1A: Study design
-- Figure 2: CD19+ B-cell counts over time
-- Figure 3: Proportion of participants with B-cell depletion over time
-- Figure 4: CD19+ B-cell counts by treatment over time
-- Supplementary Figure 1: Participants without sustained depletion
-- Supplementary Figure 2: Participants without early depletion
+- Figure 2: CD19+ B cell counts over time
+- Figure 3: Proportion of participants with B cell depletion over time
+- Figure 4: CD19+ B cell counts by treatment over time
+- Supplementary Figure 1: Participants without early depletion
+- Supplementary Figure 2: Participants without sustained depletion
 
 Figures are exported in both `.pdf` and `.tiff` formats.
 
